@@ -22,10 +22,12 @@ Widget BottomNavBar() {
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
-                Icons.event_note_rounded,
-                color: Color.fromARGB(255, 111, 97, 239),
-                size: 28.0,
+              IconButton(onPressed: (){},
+                icon: const Icon(
+                  Icons.event_note_rounded,
+                  color: Color.fromARGB(255, 111, 97, 239),
+                  size: 28.0,
+                ),
               ),
               const Text(
                 'Events',
@@ -41,10 +43,13 @@ Widget BottomNavBar() {
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
-                Icons.calendar_today_rounded,
-                color: Color.fromARGB(255, 96, 106, 133),
-                size: 28.0,
+              IconButton(
+                onPressed: (){},
+                icon: Icon(
+                  Icons.calendar_today_rounded,
+                  color: Color.fromARGB(255, 96, 106, 133),
+                  size: 28.0,
+                ),
               ),
               const Text(
                 'Calendar',
@@ -77,10 +82,12 @@ Widget BottomNavBar() {
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
-                Icons.notifications_none_rounded,
-                color: Color(0xFF606A85),
-                size: 28.0,
+              IconButton(onPressed: (){},
+                icon: const Icon(
+                  Icons.notifications_none_rounded,
+                  color: Color(0xFF606A85),
+                  size: 28.0,
+                ),
               ),
               const Text(
                 'Alerts',
@@ -96,10 +103,12 @@ Widget BottomNavBar() {
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
-                Icons.settings_outlined,
-                color: Color.fromARGB(255, 96, 106, 133),
-                size: 28.0,
+              IconButton(onPressed: (){},
+                icon: const Icon(
+                  Icons.settings_outlined,
+                  color: Color.fromARGB(255, 96, 106, 133),
+                  size: 28.0,
+                ),
               ),
               const Text(
                 'Settings',
