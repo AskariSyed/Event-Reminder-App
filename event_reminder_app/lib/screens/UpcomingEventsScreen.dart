@@ -33,10 +33,10 @@ class _UpcomingEventScreenWidgetState extends State<UpcomingEventScreenWidget> {
                 color: Color.fromARGB(255, 229, 231, 235),
               ),
               Expanded(child: _buildEventList()),
-              BottomNavBar(),
             ],
           ),
         ),
+        bottomNavigationBar: BottomNavBar(context),
       ),
     );
   }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:event_reminder_app/screens/calenderScreen.dart';
 
-Widget BottomNavBar() {
+Widget BottomNavBar(context) {
   return Container(
     width: double.infinity,
     height: 80.0,
@@ -22,7 +23,8 @@ Widget BottomNavBar() {
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              IconButton(onPressed: (){},
+              IconButton(
+                onPressed: () {},
                 icon: const Icon(
                   Icons.event_note_rounded,
                   color: Color.fromARGB(255, 111, 97, 239),
@@ -44,7 +46,12 @@ Widget BottomNavBar() {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               IconButton(
-                onPressed: (){},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => Calenderscreen()),
+                  );
+                },
                 icon: Icon(
                   Icons.calendar_today_rounded,
                   color: Color.fromARGB(255, 96, 106, 133),
@@ -82,7 +89,8 @@ Widget BottomNavBar() {
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              IconButton(onPressed: (){},
+              IconButton(
+                onPressed: () {},
                 icon: const Icon(
                   Icons.notifications_none_rounded,
                   color: Color(0xFF606A85),
@@ -103,7 +111,8 @@ Widget BottomNavBar() {
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              IconButton(onPressed: (){},
+              IconButton(
+                onPressed: () {},
                 icon: const Icon(
                   Icons.settings_outlined,
                   color: Color.fromARGB(255, 96, 106, 133),
