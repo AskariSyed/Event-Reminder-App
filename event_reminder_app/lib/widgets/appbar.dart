@@ -24,9 +24,7 @@ AppBar buildAppBar(String title) {
                 color: Color(0xFF6F61EF),
                 size: 24.0,
               ),
-              onPressed: () {
-                print('Search pressed ...');
-              },
+              onPressed: () {},
             ),
             const SizedBox(width: 12.0),
             IconButton(

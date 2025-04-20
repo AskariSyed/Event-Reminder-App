@@ -13,19 +13,19 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   final List<Map<String, String>> onboardingData = [
     {
-      'image': 'assets/images/Set Reminders.png',
+      'image': 'lib/assets/Reminders.png',
       'title': 'Set Reminders',
       'description':
           'Never miss an important event again. Set and manage reminders easily.',
     },
     {
-      'image': 'assets/images/schedule.png',
+      'image': 'lib/assets/schedule.png',
       'title': 'Stay Organized',
       'description':
           'Keep track of all your events in one place with our clean calendar.',
     },
     {
-      'image': 'assets/images/notify.png',
+      'image': 'lib/assets/notify.png',
       'title': 'Get Notified',
       'description':
           'Receive timely notifications so you’re always on time and prepared.',
