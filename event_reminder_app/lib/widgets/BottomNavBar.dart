@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:event_reminder_app/screens/calenderScreen.dart';
-import 'package:event_reminder_app/screens/UpcomingEventsScreen.dart';
-import 'package:event_reminder_app/screens/cretaeEventScreen.dart';
+import 'package:event_reminder_app/screens/calenderscreen.dart';
+import 'package:event_reminder_app/screens/upcoming_events_screen.dart';
+import 'package:event_reminder_app/screens/create_event_screen.dart';
 
 Widget BottomNavBar(context) {
   return Container(

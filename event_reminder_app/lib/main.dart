@@ -1,6 +1,6 @@
-import 'package:event_reminder_app/screens/UpcomingEventsScreen.dart';
+import 'package:event_reminder_app/screens/upcoming_events_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:event_reminder_app/screens/onBoardingScreen.dart';
+import 'package:event_reminder_app/screens/on_boarding_screen.dart';
 
 void main() {
   runApp(const MyApp());

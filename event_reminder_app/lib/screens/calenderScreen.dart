@@ -1,10 +1,9 @@
-import 'package:badges/badges.dart' as badges;
 import 'package:event_reminder_app/widgets/BottomNavBar.dart';
 import 'package:event_reminder_app/widgets/appbar.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:event_reminder_app/widgets/buildEventCard.dart';
-import 'package:event_reminder_app/mixin/EventsList.dart';
+import 'package:event_reminder_app/mixin/event_list.dart';
 
 class Calenderscreen extends StatefulWidget {
   const Calenderscreen({super.key});
@@ -13,10 +12,10 @@ class Calenderscreen extends StatefulWidget {
   static String routePath = '/calender';
 
   @override
-  State<Calenderscreen> createState() => _calenderScreen();
+  State<Calenderscreen> createState() => _CalenderScreen();
 }
 
-class _calenderScreen extends State<Calenderscreen>
+class _CalenderScreen extends State<Calenderscreen>
     with TickerProviderStateMixin {
   late TabController _tabController;
   DateTime _focusedDay = DateTime.now();
@@ -77,7 +76,10 @@ class _calenderScreen extends State<Calenderscreen>
             Expanded(
               child: TabBarView(
                 controller: _tabController,
-                children: [_buildCalendarView(context)],
+                children: [
+                  _buildCalendarView(context),
+                  _buildCalendarView(context),
+                ],
               ),
             ),
           ],

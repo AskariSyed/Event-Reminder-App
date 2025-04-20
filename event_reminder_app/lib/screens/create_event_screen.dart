@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:event_reminder_app/widgets/BottomNavBar.dart';
-import 'package:event_reminder_app/models/event.dart';
-import 'package:event_reminder_app/mixin/EventsList.dart';
+import 'package:event_reminder_app/mixin/event_list.dart';
 
 class CreateEventScreen extends StatefulWidget {
   const CreateEventScreen({super.key});

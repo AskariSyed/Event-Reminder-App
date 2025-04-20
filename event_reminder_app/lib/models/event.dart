@@ -4,7 +4,7 @@ class Event {
   String date;
   String time;
   String description;
-  String Location;
+  String location;
   bool notificationEnabled;
 
   Event({
@@ -13,7 +13,7 @@ class Event {
     required this.date,
     required this.time,
     required this.description,
-    required this.Location,
+    required this.location,
     required this.notificationEnabled,
   });
 }

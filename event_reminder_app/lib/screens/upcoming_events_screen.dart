@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:event_reminder_app/widgets/BottomNavBar.dart';
-import 'package:event_reminder_app/mixin/EventsList.dart';
+import 'package:event_reminder_app/mixin/event_list.dart';
 import 'package:event_reminder_app/widgets/buildEventCard.dart';
 import 'package:event_reminder_app/widgets/appbar.dart';
 
