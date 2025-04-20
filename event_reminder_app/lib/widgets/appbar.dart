@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-AppBar buildAppBar() {
+AppBar buildAppBar(String title) {
   return AppBar(
     backgroundColor: const Color(0xFFF1F4F8),
     automaticallyImplyLeading: false,
-    title: const Text(
-      'Upcoming Events',
+    title: Text(
+      title,
       style: TextStyle(
         fontFamily: 'Outfit',
         color: Color(0xFF15161E),

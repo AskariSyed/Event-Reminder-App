@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:event_reminder_app/screens/calenderScreen.dart';
+import 'package:event_reminder_app/screens/UpcomingEventsScreen.dart';
+import 'package:event_reminder_app/screens/cretaeEventScreen.dart';
 
 Widget BottomNavBar(context) {
   return Container(
@@ -24,7 +26,14 @@ Widget BottomNavBar(context) {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               IconButton(
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => UpcomingEventScreenWidget(),
+                    ),
+                  );
+                },
                 icon: const Icon(
                   Icons.event_note_rounded,
                   color: Color.fromARGB(255, 111, 97, 239),
@@ -74,7 +83,12 @@ Widget BottomNavBar(context) {
             children: [
               FloatingActionButton(
                 onPressed: () {
-                  print('Add event pressed ...');
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => CreateEventScreen(),
+                    ),
+                  );
                 },
                 backgroundColor: const Color.fromARGB(255, 111, 97, 239),
                 elevation: 2.0,

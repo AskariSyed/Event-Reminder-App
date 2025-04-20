@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:event_reminder_app/widgets/BottomNavBar.dart';
 import 'package:event_reminder_app/mixin/EventsList.dart';
 import 'package:event_reminder_app/widgets/buildEventCard.dart';
-import 'package:event_reminder_app/widgets/AppBar.dart';
+import 'package:event_reminder_app/widgets/appbar.dart';
 
 class UpcomingEventScreenWidget extends StatefulWidget {
   const UpcomingEventScreenWidget({super.key});
@@ -23,7 +23,7 @@ class _UpcomingEventScreenWidgetState extends State<UpcomingEventScreenWidget> {
       child: Scaffold(
         key: scaffoldKey,
         backgroundColor: const Color.fromARGB(255, 241, 244, 248),
-        appBar: buildAppBar(),
+        appBar: buildAppBar('Upcoming Events'),
         body: SafeArea(
           child: Column(
             children: [

@@ -1,5 +1,6 @@
 import 'package:event_reminder_app/screens/UpcomingEventsScreen.dart';
 import 'package:flutter/material.dart';
+import 'package:event_reminder_app/screens/onBoardingScreen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -14,7 +15,12 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Event Reminder App',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: const UpcomingEventScreenWidget(),
+
+      initialRoute: '/',
+      routes: {
+        '/': (context) => const OnboardingScreen(),
+        '/home': (context) => const UpcomingEventScreenWidget(),
+      },
     );
   }
 }
