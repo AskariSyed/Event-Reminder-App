@@ -227,7 +227,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
               ElevatedButton(
                 onPressed: _submitForm,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF6F61EF),
+                  backgroundColor: const Color.fromARGB(255, 111, 97, 239),
                   padding: const EdgeInsets.symmetric(
                     horizontal: 40,
                     vertical: 12,
@@ -236,13 +236,16 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                     borderRadius: BorderRadius.circular(16),
                   ),
                 ),
-                child: const Text('Create Event'),
+                child: const Text(
+                  'Create Event',
+                  style: TextStyle(color: Colors.white),
+                ),
               ),
             ],
           ),
         ),
       ),
-      bottomNavigationBar: BottomNavBar(context),
+      bottomNavigationBar: BottomNavBar(currentIndex: 2),
     );
   }
 }

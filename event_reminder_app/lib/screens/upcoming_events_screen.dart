@@ -36,7 +36,7 @@ class _UpcomingEventScreenWidgetState extends State<UpcomingEventScreenWidget> {
             ],
           ),
         ),
-        bottomNavigationBar: BottomNavBar(context),
+        bottomNavigationBar: BottomNavBar(currentIndex: 0),
       ),
     );
   }

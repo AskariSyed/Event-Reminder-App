@@ -84,7 +84,7 @@ class _CalenderScreen extends State<Calenderscreen>
             ),
           ],
         ),
-        bottomNavigationBar: BottomNavBar(context),
+        bottomNavigationBar: BottomNavBar(currentIndex: 1),
       ),
     );
   }
@@ -121,7 +121,7 @@ class _CalenderScreen extends State<Calenderscreen>
               },
               calendarStyle: CalendarStyle(
                 todayDecoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor.withOpacity(0.5),
+                  color: Theme.of(context).primaryColor.withAlpha(128),
                   shape: BoxShape.circle,
                 ),
                 selectedDecoration: BoxDecoration(

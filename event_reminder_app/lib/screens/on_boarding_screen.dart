@@ -144,6 +144,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       _currentIndex == onboardingData.length - 1
                           ? 'Get Started'
                           : 'Next',
+                      style: TextStyle(color: Colors.white),
                     ),
                   ),
                 ],
