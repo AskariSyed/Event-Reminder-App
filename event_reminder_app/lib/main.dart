@@ -1,8 +1,14 @@
 import 'package:event_reminder_app/screens/upcoming_events_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:event_reminder_app/screens/on_boarding_screen.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized(); // Ensure Flutter bindings are initialized
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  ); // Initialize Firebase
   runApp(const MyApp());
 }
 
