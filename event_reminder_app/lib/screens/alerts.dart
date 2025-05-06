@@ -5,7 +5,7 @@ import 'package:event_reminder_app/widgets/BottomNavBar.dart';
 import 'package:event_reminder_app/mixin/event_list.dart';
 
 class AlertsScreenState extends StatefulWidget {
-  const AlertsScreenState({Key? key}) : super(key: key);
+  const AlertsScreenState({super.key});
 
   @override
   _AlertsScreenState createState() => _AlertsScreenState();
@@ -199,7 +199,7 @@ class _AlertsScreenState extends State<AlertsScreenState> {
                     ),
                   ),
                 );
-              }).toList(),
+              }),
 
             // Notification History Section
             const SizedBox(height: 16),

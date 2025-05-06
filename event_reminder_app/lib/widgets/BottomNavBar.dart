@@ -8,7 +8,7 @@ import 'package:event_reminder_app/screens/create_event_screen.dart';
 class BottomNavBar extends StatefulWidget {
   final int currentIndex;
 
-  const BottomNavBar({Key? key, required this.currentIndex}) : super(key: key);
+  const BottomNavBar({super.key, required this.currentIndex});
 
   @override
   _BottomNavBarState createState() => _BottomNavBarState();
