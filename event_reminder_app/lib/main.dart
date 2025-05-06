@@ -3,11 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:event_reminder_app/screens/on_boarding_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load(); // Ensure Flutter bindings are initialized
+  // Ensure Flutter bindings are initialized
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   ); // Initialize Firebase
