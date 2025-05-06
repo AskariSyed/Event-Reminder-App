@@ -37,6 +37,7 @@ dependencies:
   table_calendar: ^3.2.0
   badges: ^3.1.2
   firebase_core: ^3.13.0
+  flutter_dotenv: ^5.2.1
 
 dev_dependencies:
   flutter_test:
