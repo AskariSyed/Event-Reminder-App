@@ -2,7 +2,10 @@ import 'package:event_reminder_app/screens/upcoming_events_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:event_reminder_app/screens/on_boarding_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:provider/provider.dart';
 import 'firebase_options.dart';
+import 'package:event_reminder_app/screens/auth_screen.dart';
+import 'package:event_reminder_app/providers/user_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -10,7 +13,13 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   ); // Initialize Firebase
-  runApp(const MyApp());
+
+  runApp(
+    MultiProvider(
+      providers: [ChangeNotifierProvider(create: (_) => UserProvider())],
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -26,6 +35,7 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => const OnboardingScreen(),
+        '/auth': (context) => const AuthScreen(),
         '/home': (context) => const UpcomingEventScreenWidget(),
       },
     );

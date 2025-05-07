@@ -1,5 +1,6 @@
 import 'package:event_reminder_app/widgets/BottomNavBar.dart';
 import 'package:event_reminder_app/widgets/appbar.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -22,20 +23,11 @@ class _SettingsPageState extends State<SettingsPage> {
     '1 hour',
     '1 day',
   ];
-
-  // Placeholder for user name (replace with actual user data)
-  final String userName = 'Askari Syed';
-
-  void handleLogout() {
-    // Placeholder for logout logic
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Logged out successfully!')));
-    // Add navigation to login screen or similar logic here
-  }
-
   @override
   Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+    final String userName = user?.displayName ?? 'User';
+    final String? photoUrl = user?.photoURL;
     return Scaffold(
       backgroundColor: const Color(0xFFF5F6FA),
       appBar: buildAppBar('Settings'),
@@ -55,11 +47,21 @@ class _SettingsPageState extends State<SettingsPage> {
                 padding: const EdgeInsets.all(16.0),
                 child: Row(
                   children: [
-                    const CircleAvatar(
+                    CircleAvatar(
                       radius: 30,
-                      backgroundColor: Color(0xFF6C63FF),
-                      child: Icon(Icons.person, size: 40, color: Colors.white),
+                      backgroundImage:
+                          photoUrl != null ? NetworkImage(photoUrl!) : null,
+                      backgroundColor: const Color(0xFF6C63FF),
+                      child:
+                          photoUrl == null
+                              ? const Icon(
+                                Icons.person,
+                                size: 40,
+                                color: Colors.white,
+                              )
+                              : null,
                     ),
+
                     const SizedBox(width: 16),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -306,5 +308,14 @@ class _SettingsPageState extends State<SettingsPage> {
       ),
       bottomNavigationBar: BottomNavBar(currentIndex: 4),
     );
+  }
+
+  void handleLogout() async {
+    await FirebaseAuth.instance.signOut();
+    if (!mounted) return;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Logged out successfully!')));
+    Navigator.of(context).pushReplacementNamed('/auth');
   }
 }

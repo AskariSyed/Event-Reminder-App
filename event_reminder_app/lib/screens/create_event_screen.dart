@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:event_reminder_app/widgets/BottomNavBar.dart';
 import 'package:event_reminder_app/mixin/event_list.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CreateEventScreen extends StatefulWidget {
   const CreateEventScreen({super.key});
@@ -47,7 +49,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     }
   }
 
-  void _submitForm() {
+  void _submitForm() async {
     if (_formKey.currentState!.validate() &&
         selectedDate != null &&
         selectedTime != null) {
@@ -93,6 +95,16 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
 
       final timeFormatted = selectedTime!.format(context);
 
+      // Get the current user
+      User? user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Please log in to create an event")),
+        );
+        return;
+      }
+
+      // Create the event data
       final newEvent = {
         'id': (events.length + 1).toString(),
         'remainingTime': 'TBC',
@@ -102,9 +114,16 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
         'location': location,
         'description': description,
         'timeColor': '0xFF6F61EE',
+        'userId': user.uid,
       };
 
-      events.add(newEvent);
+      await FirebaseFirestore.instance.collection('events').add(newEvent);
+
+      // Show success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Event Created Successfully")),
+      );
+
       Navigator.pop(context, newEvent);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(

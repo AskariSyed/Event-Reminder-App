@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-Widget buildEventCard(Map<String, String> event) {
+Widget buildEventCard(Map<String, dynamic> event) {
   return Container(
     width: double.infinity,
     decoration: BoxDecoration(

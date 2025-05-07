@@ -38,6 +38,15 @@ dependencies:
   badges: ^3.1.2
   firebase_core: ^3.13.0
   flutter_dotenv: ^5.2.1
+  font_awesome_flutter: ^10.8.0
+  firebase_auth: ^5.5.3
+  google_sign_in: ^6.3.0
+  intl: ^0.20.2
+  sign_in_button: ^3.2.0
+  provider: ^6.1.5
+  flutter_native_splash: ^2.4.6
+  flutter_launcher_icons: ^0.14.3
+  cloud_firestore: ^5.6.7
 
 dev_dependencies:
   flutter_test:
@@ -49,6 +58,20 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
+
+
+
+flutter_native_splash:
+  color: "#42a5f5"  # Background color
+  image: lib/assets/logo.png # Your logo image path
+  android: true  # For Android
+  ios: true  # For iOS
+  web: true 
+
+
+flutter_icons:
+  android: true
+  image_path: "lib/assets/logo.png"
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

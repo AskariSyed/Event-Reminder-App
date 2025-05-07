@@ -46,7 +46,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   void _goToHome() {
     Navigator.pushReplacementNamed(
       context,
-      '/home',
+      '/auth',
     ); // or your main screen route
   }
 

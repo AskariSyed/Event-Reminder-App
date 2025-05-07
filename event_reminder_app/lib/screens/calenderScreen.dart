@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:event_reminder_app/widgets/buildEventCard.dart';
 import 'package:event_reminder_app/mixin/event_list.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:provider/provider.dart';
+import 'package:event_reminder_app/providers/user_provider.dart';
 
 class Calenderscreen extends StatefulWidget {
   const Calenderscreen({super.key});
@@ -90,7 +93,13 @@ class _CalenderScreen extends State<Calenderscreen>
   }
 
   Widget _buildCalendarView(BuildContext context) {
-    final event = events[1];
+    final userProvider = Provider.of<UserProvider>(context);
+    final userId = userProvider.user?.uid;
+
+    if (userId == null) {
+      return Center(child: Text('User not logged in.'));
+    }
+
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -149,27 +158,80 @@ class _CalenderScreen extends State<Calenderscreen>
               style: TextStyle(fontSize: 14, color: Colors.grey),
             ),
           ),
-          ListView(
-            padding: EdgeInsets.zero,
-            shrinkWrap: true,
-            physics: NeverScrollableScrollPhysics(),
-            children: [buildEventCard(event)],
-          ),
-          Padding(
-            padding: EdgeInsets.fromLTRB(16, 12, 0, 0),
-            child: Text(
-              'Past Due',
-              style: TextStyle(fontSize: 14, color: Colors.grey),
-            ),
-          ),
-          ListView(
-            padding: EdgeInsets.fromLTRB(0, 12, 0, 24),
-            shrinkWrap: true,
-            physics: NeverScrollableScrollPhysics(),
-            children: [buildEventCard(event)],
+          // Fetch events for the selected day
+          StreamBuilder<QuerySnapshot>(
+            stream:
+                FirebaseFirestore.instance
+                    .collection('events')
+                    .where('userId', isEqualTo: userId)
+                    .where(
+                      'date',
+                      isEqualTo: _formatDateToString(_selectedDay),
+                    ) // Call the helper function
+                    .snapshots(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(child: CircularProgressIndicator());
+              }
+
+              if (snapshot.hasError) {
+                return Center(child: Text('Error fetching events.'));
+              }
+
+              final events = snapshot.data?.docs ?? [];
+              if (events.isEmpty) {
+                return Center(child: Text('No upcoming events.'));
+              }
+
+              return ListView.builder(
+                padding: EdgeInsets.zero,
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+                itemCount: events.length,
+                itemBuilder: (context, index) {
+                  final event = events[index].data() as Map<String, dynamic>;
+                  return buildEventCard(event);
+                },
+              );
+            },
           ),
         ],
       ),
     );
+  }
+
+  // Helper function to format the date to string
+  String _formatDateToString(DateTime? date) {
+    if (date == null) return '';
+
+    // Get the weekday and month names
+    final dayNames = [
+      'Sunday',
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+    ];
+    final monthNames = [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ];
+
+    final dayName = dayNames[date.weekday % 7];
+    final monthName = monthNames[date.month - 1];
+
+    return '$dayName, $monthName ${date.day}, ${date.year}';
   }
 }
