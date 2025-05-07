@@ -97,14 +97,28 @@ class _UpcomingEventScreenWidgetState extends State<UpcomingEventScreenWidget> {
                   child: const Icon(Icons.delete, color: Colors.white),
                 ),
                 onDismissed: (direction) {
+                  final docId =
+                      events[index].id; // Access the Firestore document ID
+
+                  // Delete the event using the Firestore document ID (docId)
                   FirebaseFirestore.instance
                       .collection('events')
-                      .doc(event['id'])
-                      .delete();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('${event['title']} deleted')),
-                  );
+                      .doc(docId) // Use the Firestore document ID
+                      .delete()
+                      .then((_) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('${event['title']} deleted')),
+                        );
+                      })
+                      .catchError((error) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('Error deleting event: $error'),
+                          ),
+                        );
+                      });
                 },
+
                 child: buildEventCard(event),
               ),
             );

@@ -50,7 +50,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     CircleAvatar(
                       radius: 30,
                       backgroundImage:
-                          photoUrl != null ? NetworkImage(photoUrl!) : null,
+                          photoUrl != null ? NetworkImage(photoUrl) : null,
                       backgroundColor: const Color(0xFF6C63FF),
                       child:
                           photoUrl == null

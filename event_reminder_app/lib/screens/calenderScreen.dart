@@ -3,7 +3,6 @@ import 'package:event_reminder_app/widgets/appbar.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:event_reminder_app/widgets/buildEventCard.dart';
-import 'package:event_reminder_app/mixin/event_list.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import 'package:event_reminder_app/providers/user_provider.dart';
