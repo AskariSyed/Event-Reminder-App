@@ -17,6 +17,29 @@ class _AuthScreenState extends State<AuthScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool isLogin = true;
+  @override
+  void initState() {
+    super.initState();
+    _checkIfLoggedIn();
+  }
+
+  void _checkIfLoggedIn() {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      AppUser appUser = AppUser(
+        uid: user.uid,
+        name: user.displayName,
+        email: user.email,
+        photoUrl: user.photoURL,
+      );
+
+      // Defer state changes and navigation
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Provider.of<UserProvider>(context, listen: false).setUser(appUser);
+        Navigator.pushReplacementNamed(context, '/home');
+      });
+    }
+  }
 
   Future<void> _submit() async {
     final isValid = _formKey.currentState!.validate();

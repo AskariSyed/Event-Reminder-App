@@ -2,6 +2,7 @@ import 'package:event_reminder_app/widgets/BottomNavBar.dart';
 import 'package:event_reminder_app/widgets/appbar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -311,7 +312,11 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   void handleLogout() async {
+    try {
+      await GoogleSignIn().disconnect();
+    } catch (e) {}
     await FirebaseAuth.instance.signOut();
+
     if (!mounted) return;
     ScaffoldMessenger.of(
       context,

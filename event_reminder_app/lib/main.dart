@@ -1,4 +1,5 @@
 import 'package:event_reminder_app/screens/upcoming_events_screen.dart';
+import 'package:event_reminder_app/services/notification_services.dart';
 import 'package:flutter/material.dart';
 import 'package:event_reminder_app/screens/on_boarding_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -13,6 +14,7 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   ); // Initialize Firebase
+  await initializeNotifications();
 
   runApp(
     MultiProvider(

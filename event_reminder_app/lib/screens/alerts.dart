@@ -134,6 +134,7 @@ class _AlertsScreenState extends State<AlertsScreenState> {
               )
             else
               ...activeAlerts.asMap().entries.map((entry) {
+                // ignore: unused_local_variable
                 int index = entry.key;
                 Map<String, String> event = entry.value;
                 return Card(

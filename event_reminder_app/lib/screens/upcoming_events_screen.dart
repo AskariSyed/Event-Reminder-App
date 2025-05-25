@@ -45,12 +45,10 @@ class _UpcomingEventScreenWidgetState extends State<UpcomingEventScreenWidget> {
     );
   }
 
-  // Fetch events for a specific user
   Widget _buildEventList(String? userId) {
     if (userId == null) {
       return const Center(child: Text('User not logged in.'));
     }
-
     return StreamBuilder<QuerySnapshot>(
       stream:
           FirebaseFirestore.instance
@@ -71,7 +69,6 @@ class _UpcomingEventScreenWidgetState extends State<UpcomingEventScreenWidget> {
         if (events.isEmpty) {
           return const Center(child: Text('No upcoming events.'));
         }
-
         return ListView.builder(
           padding: const EdgeInsets.symmetric(vertical: 16.0),
           itemCount: events.length,
@@ -83,7 +80,7 @@ class _UpcomingEventScreenWidgetState extends State<UpcomingEventScreenWidget> {
                 vertical: 8.0,
               ),
               child: Dismissible(
-                key: Key(event['id']),
+                key: Key(events[index].id),
                 background: Container(
                   color: Colors.red,
                   alignment: Alignment.centerLeft,
@@ -97,26 +94,27 @@ class _UpcomingEventScreenWidgetState extends State<UpcomingEventScreenWidget> {
                   child: const Icon(Icons.delete, color: Colors.white),
                 ),
                 onDismissed: (direction) {
-                  final docId =
-                      events[index].id; // Access the Firestore document ID
+                  final docId = events[index].id;
+                  final deletedTitle = event['title'] ?? 'Event';
 
-                  // Delete the event using the Firestore document ID (docId)
-                  FirebaseFirestore.instance
-                      .collection('events')
-                      .doc(docId) // Use the Firestore document ID
-                      .delete()
-                      .then((_) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('${event['title']} deleted')),
-                        );
-                      })
-                      .catchError((error) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Error deleting event: $error'),
-                          ),
-                        );
-                      });
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    FirebaseFirestore.instance
+                        .collection('events')
+                        .doc(docId)
+                        .delete()
+                        .then((_) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('$deletedTitle deleted')),
+                          );
+                        })
+                        .catchError((error) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Error deleting event: $error'),
+                            ),
+                          );
+                        });
+                  });
                 },
 
                 child: buildEventCard(event),

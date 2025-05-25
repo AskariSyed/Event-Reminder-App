@@ -1,3 +1,4 @@
+import 'package:event_reminder_app/services/notification_services.dart';
 import 'package:flutter/material.dart';
 import 'package:event_reminder_app/widgets/BottomNavBar.dart';
 import 'package:event_reminder_app/mixin/event_list.dart';
@@ -6,7 +7,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class CreateEventScreen extends StatefulWidget {
   const CreateEventScreen({super.key});
-
   @override
   State<CreateEventScreen> createState() => _CreateEventScreenState();
 }
@@ -55,7 +55,6 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
         selectedTime != null) {
       _formKey.currentState!.save();
 
-      // Format the date and time as desired
       final formattedDate =
           "${selectedDate!.weekday == DateTime.monday
               ? "Monday"
@@ -94,8 +93,6 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
               : "December"} ${selectedDate!.day}, ${selectedDate!.year}";
 
       final timeFormatted = selectedTime!.format(context);
-
-      // Get the current user
       User? user = FirebaseAuth.instance.currentUser;
       if (user == null) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -104,7 +101,16 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
         return;
       }
 
-      // Create the event data
+      final combinedDateTime = DateTime(
+        selectedDate!.year,
+        selectedDate!.month,
+        selectedDate!.day,
+        selectedTime!.hour,
+        selectedTime!.minute,
+      );
+
+      final notificationId = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+
       final newEvent = {
         'id': (events.length + 1).toString(),
         'remainingTime': 'TBC',
@@ -115,15 +121,23 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
         'description': description,
         'timeColor': '0xFF6F61EE',
         'userId': user.uid,
+        'notificationId': notificationEnabled ? notificationId : null,
       };
 
       await FirebaseFirestore.instance.collection('events').add(newEvent);
 
-      // Show success message
+      if (notificationEnabled) {
+        await scheduleNotification(
+          id: notificationId,
+          title: 'Event: $title',
+          body: 'Reminder for your event at $timeFormatted',
+          scheduledDateTime: combinedDateTime,
+        );
+      }
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Event Created Successfully")),
       );
-
       Navigator.pop(context, newEvent);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -180,8 +194,6 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                 ),
               ),
               const SizedBox(height: 12),
-
-              // Date and Time Row
               Row(
                 children: [
                   Expanded(
