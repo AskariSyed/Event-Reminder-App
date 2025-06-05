@@ -15,17 +15,13 @@ class _AlertsScreenState extends State<AlertsScreenState> {
   // List to store dismissed events (notification history)
   final List<Map<String, String>> notificationHistory = [];
 
-  // Calculate time until the event
   String getTimeUntilEvent(Map<String, String> event) {
     DateTime now = DateTime.now();
     DateTime eventDateTime;
 
     try {
-      // Extract date (e.g., "Monday, June 10, 2024" or "Today, June 8, 2024")
       String dateString = event['date']!.replaceFirst('Today, ', '');
       DateTime eventDate = DateFormat('EEEE, MMMM d, yyyy').parse(dateString);
-
-      // Extract start time (e.g., "10:00 AM" from "10:00 AM - 11:30 AM")
       String startTime = event['time']!.split(' - ')[0];
       DateTime eventTime = DateFormat('h:mm a').parse(startTime);
 
@@ -40,7 +36,6 @@ class _AlertsScreenState extends State<AlertsScreenState> {
       return 'Invalid date/time';
     }
 
-    // Calculate difference
     Duration difference = eventDateTime.difference(now);
 
     if (difference.isNegative) {
@@ -134,6 +129,7 @@ class _AlertsScreenState extends State<AlertsScreenState> {
               )
             else
               ...activeAlerts.asMap().entries.map((entry) {
+                // ignore: unused_local_variable
                 int index = entry.key;
                 Map<String, String> event = entry.value;
                 return Card(

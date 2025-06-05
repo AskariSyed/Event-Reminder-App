@@ -65,7 +65,6 @@ Widget buildEventCard(Map<String, dynamic> event) {
                         size: 20.0,
                       ),
                       onPressed: () {
-                        print('Edit ${event['title']} pressed ...');
                       },
                     ),
                   ],

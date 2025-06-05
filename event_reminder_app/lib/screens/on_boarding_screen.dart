@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -43,12 +44,19 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     }
   }
 
-  void _goToHome() {
-    Navigator.pushReplacementNamed(
-      context,
-      '/auth',
-    ); // or your main screen route
-  }
+   _goToHome() async {
+    await completeOnboarding(); 
+  Navigator.pushReplacementNamed(
+    context,
+    '/auth',
+  );
+}
+Future<void> completeOnboarding() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  await prefs.setBool('onboarding_done', true);
+}
+
+
 
   Widget _buildPage(Map<String, String> page) {
     return Column(

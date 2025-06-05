@@ -2,7 +2,7 @@ import 'package:event_reminder_app/providers/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:event_reminder_app/widgets/BottomNavBar.dart';
-import 'package:event_reminder_app/widgets/buildEventCard.dart';
+import 'package:event_reminder_app/widgets/buildeventcard.dart';
 import 'package:event_reminder_app/widgets/appbar.dart';
 import 'package:provider/provider.dart';
 
@@ -13,7 +13,6 @@ class UpcomingEventScreenWidget extends StatefulWidget {
   State<UpcomingEventScreenWidget> createState() =>
       _UpcomingEventScreenWidgetState();
 }
-
 class _UpcomingEventScreenWidgetState extends State<UpcomingEventScreenWidget> {
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -21,7 +20,6 @@ class _UpcomingEventScreenWidgetState extends State<UpcomingEventScreenWidget> {
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context);
     final userId = userProvider.user?.uid;
-
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
@@ -98,12 +96,10 @@ class _UpcomingEventScreenWidgetState extends State<UpcomingEventScreenWidget> {
                 ),
                 onDismissed: (direction) {
                   final docId =
-                      events[index].id; // Access the Firestore document ID
-
-                  // Delete the event using the Firestore document ID (docId)
+                      events[index].id; 
                   FirebaseFirestore.instance
                       .collection('events')
-                      .doc(docId) // Use the Firestore document ID
+                      .doc(docId)
                       .delete()
                       .then((_) {
                         ScaffoldMessenger.of(context).showSnackBar(
