@@ -1,4 +1,5 @@
 import 'package:event_reminder_app/screens/upcoming_events_screen.dart';
+import 'package:event_reminder_app/services/notification_services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:event_reminder_app/screens/on_boarding_screen.dart';
@@ -11,6 +12,11 @@ import 'package:event_reminder_app/providers/user_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Ensure Flutter bindings are initialized
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  ); // Initialize Firebase
+  await initializeNotifications();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   runApp(

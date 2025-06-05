@@ -44,19 +44,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     }
   }
 
-   _goToHome() async {
-    await completeOnboarding(); 
-  Navigator.pushReplacementNamed(
-    context,
-    '/auth',
-  );
-}
-Future<void> completeOnboarding() async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  await prefs.setBool('onboarding_done', true);
-}
+  void _goToHome() async {
+    await completeOnboarding();
+    Navigator.pushReplacementNamed(context, '/auth');
+  }
 
-
+  Future<void> completeOnboarding() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('onboarding_done', true);
+  }
 
   Widget _buildPage(Map<String, String> page) {
     return Column(
