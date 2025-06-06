@@ -1,19 +1,20 @@
-import 'package:event_reminder_app/services/notification_services.dart';
-import 'package:flutter/material.dart';
-import 'package:event_reminder_app/widgets/BottomNavBar.dart';
-import 'package:event_reminder_app/mixin/event_list.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:event_reminder_app/services/notification_services.dart';
+import 'package:event_reminder_app/widgets/bottom_nav_bar.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:timezone/timezone.dart' as tz;
 
 class CreateEventScreen extends StatefulWidget {
   const CreateEventScreen({super.key});
+
   @override
   State<CreateEventScreen> createState() => _CreateEventScreenState();
 }
 
 class _CreateEventScreenState extends State<CreateEventScreen> {
   final _formKey = GlobalKey<FormState>();
-
   String title = '';
   String location = '';
   String description = '';
@@ -29,7 +30,7 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       lastDate: DateTime(2100),
     );
 
-    if (picked != null) {
+    if (picked != null && mounted) {
       setState(() {
         selectedDate = picked;
       });
@@ -42,116 +43,153 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       initialTime: selectedTime ?? TimeOfDay.now(),
     );
 
-    if (picked != null) {
+    if (picked != null && mounted) {
       setState(() {
         selectedTime = picked;
       });
     }
   }
 
-  void _submitForm() async {
-    if (_formKey.currentState!.validate() &&
-        selectedDate != null &&
-        selectedTime != null) {
-      _formKey.currentState!.save();
-
-      final formattedDate =
-          "${selectedDate!.weekday == DateTime.monday
-              ? "Monday"
-              : selectedDate!.weekday == DateTime.tuesday
-              ? "Tuesday"
-              : selectedDate!.weekday == DateTime.wednesday
-              ? "Wednesday"
-              : selectedDate!.weekday == DateTime.thursday
-              ? "Thursday"
-              : selectedDate!.weekday == DateTime.friday
-              ? "Friday"
-              : selectedDate!.weekday == DateTime.saturday
-              ? "Saturday"
-              : "Sunday"}, ${selectedDate!.month == 1
-              ? "January"
-              : selectedDate!.month == 2
-              ? "February"
-              : selectedDate!.month == 3
-              ? "March"
-              : selectedDate!.month == 4
-              ? "April"
-              : selectedDate!.month == 5
-              ? "May"
-              : selectedDate!.month == 6
-              ? "June"
-              : selectedDate!.month == 7
-              ? "July"
-              : selectedDate!.month == 8
-              ? "August"
-              : selectedDate!.month == 9
-              ? "September"
-              : selectedDate!.month == 10
-              ? "October"
-              : selectedDate!.month == 11
-              ? "November"
-              : "December"} ${selectedDate!.day}, ${selectedDate!.year}";
-
-      final timeFormatted = selectedTime!.format(context);
-      User? user = FirebaseAuth.instance.currentUser;
-      if (user == null) {
+  Future<void> _submitForm() async {
+    if (!_formKey.currentState!.validate() ||
+        selectedDate == null ||
+        selectedTime == null) {
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Please log in to create an event")),
+          SnackBar(
+            content: Text(
+              'Please complete all required fields.',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+            ),
+            backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+          ),
         );
-        return;
       }
+      return;
+    }
 
-      final combinedDateTime = DateTime(
-        selectedDate!.year,
-        selectedDate!.month,
-        selectedDate!.day,
-        selectedTime!.hour,
-        selectedTime!.minute,
-      );
+    _formKey.currentState!.save();
 
-      final notificationId = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Please log in to create an event.',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+            ),
+            backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+          ),
+        );
+      }
+      return;
+    }
 
-      final newEvent = {
-        'id': (events.length + 1).toString(),
-        'remainingTime': 'TBC',
-        'title': title,
-        'date': formattedDate,
-        'time': timeFormatted,
-        'location': location,
-        'description': description,
-        'timeColor': '0xFF6F61EE',
-        'userId': user.uid,
-        'notificationId': notificationEnabled ? notificationId : null,
-      };
+    // Combine date and time
+    final combinedDateTime = DateTime(
+      selectedDate!.year,
+      selectedDate!.month,
+      selectedDate!.day,
+      selectedTime!.hour,
+      selectedTime!.minute,
+    );
 
+    final tzScheduledDateTime = tz.TZDateTime.from(combinedDateTime, tz.local);
+    if (tzScheduledDateTime.isBefore(tz.TZDateTime.now(tz.local))) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Cannot schedule an event in the past.',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+            ),
+            backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+          ),
+        );
+      }
+      return;
+    }
+
+    // Format date and time
+    final dateFormat = DateFormat('EEEE, MMMM d, yyyy');
+    final timeFormat = DateFormat('h:mm a');
+    final formattedDate = dateFormat.format(combinedDateTime);
+    final formattedTime = timeFormat.format(combinedDateTime);
+
+    final notificationId = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+
+    final newEvent = {
+      'id': DateTime.now().millisecondsSinceEpoch.toString(),
+      'remainingTime': 'TBC',
+      'title': title,
+      'date': formattedDate,
+      'time': formattedTime,
+      'location': location,
+      'description': description,
+      'timeColor': '0xFF6F61EF',
+      'userId': user.uid,
+      'notificationId': notificationEnabled ? notificationId : null,
+    };
+
+    try {
+      // Save event to Firestore
       await FirebaseFirestore.instance.collection('events').add(newEvent);
 
+      // Schedule notification if enabled
       if (notificationEnabled) {
         await scheduleNotification(
           id: notificationId,
           title: 'Event: $title',
-          body: 'Reminder for your event at $timeFormatted',
+          body: 'Reminder for your event at $formattedTime',
           scheduledDateTime: combinedDateTime,
         );
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Event Created Successfully")),
-      );
-      Navigator.pop(context, newEvent);
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please complete all fields")),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Event created successfully!',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+            ),
+            backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+          ),
+        );
+        Navigator.pop(context, newEvent);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Error creating event: $e',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+            ),
+            backgroundColor: Theme.of(context).colorScheme.surfaceContainer,
+          ),
+        );
+      }
     }
   }
 
   Widget buildCard({required Widget child}) {
     return Card(
       elevation: 3,
+      color: Theme.of(context).cardColor,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: child,
       ),
     );
@@ -160,11 +198,12 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text("Create New Event"),
-        backgroundColor: const Color(0xFFF1F4F8),
-        foregroundColor: Colors.black,
-        elevation: 0,
+        title: const Text('Create Event'),
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+        foregroundColor: Theme.of(context).appBarTheme.foregroundColor,
+        elevation: Theme.of(context).appBarTheme.elevation,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -174,23 +213,27 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
             children: [
               buildCard(
                 child: TextFormField(
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Event Title',
                     border: InputBorder.none,
+                    labelStyle: Theme.of(context).textTheme.bodyMedium,
                   ),
                   validator:
                       (value) => value!.isEmpty ? 'Please enter a title' : null,
                   onSaved: (value) => title = value!,
+                  style: Theme.of(context).textTheme.bodyLarge,
                 ),
               ),
               const SizedBox(height: 12),
               buildCard(
                 child: TextFormField(
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Location',
                     border: InputBorder.none,
+                    labelStyle: Theme.of(context).textTheme.bodyMedium,
                   ),
                   onSaved: (value) => location = value ?? '',
+                  style: Theme.of(context).textTheme.bodyLarge,
                 ),
               ),
               const SizedBox(height: 12),
@@ -203,9 +246,13 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                         title: Text(
                           selectedDate == null
                               ? 'Select Date'
-                              : '${selectedDate!.toLocal()}'.split(' ')[0],
+                              : DateFormat('yyyy-MM-dd').format(selectedDate!),
+                          style: Theme.of(context).textTheme.bodyLarge,
                         ),
-                        trailing: const Icon(Icons.calendar_today),
+                        trailing: Icon(
+                          Icons.calendar_today,
+                          color: Theme.of(context).iconTheme.color,
+                        ),
                         onTap: _pickDate,
                       ),
                     ),
@@ -219,8 +266,12 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                           selectedTime == null
                               ? 'Select Time'
                               : selectedTime!.format(context),
+                          style: Theme.of(context).textTheme.bodyLarge,
                         ),
-                        trailing: const Icon(Icons.access_time),
+                        trailing: Icon(
+                          Icons.access_time,
+                          color: Theme.of(context).iconTheme.color,
+                        ),
                         onTap: _pickTime,
                       ),
                     ),
@@ -228,55 +279,51 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
                 ],
               ),
               const SizedBox(height: 12),
-
               buildCard(
                 child: TextFormField(
                   maxLines: 4,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Description (Optional)',
                     border: InputBorder.none,
+                    labelStyle: Theme.of(context).textTheme.bodyMedium,
                   ),
                   onSaved: (value) => description = value ?? '',
+                  style: Theme.of(context).textTheme.bodyLarge,
                 ),
               ),
               const SizedBox(height: 12),
-
               buildCard(
                 child: SwitchListTile(
                   contentPadding: EdgeInsets.zero,
-                  title: const Text('Enable Notification'),
+                  title: Text(
+                    'Enable Notification',
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
                   value: notificationEnabled,
                   onChanged: (value) {
                     setState(() {
                       notificationEnabled = value;
                     });
                   },
+                  activeColor: Theme.of(context).primaryColor,
                 ),
               ),
               const SizedBox(height: 20),
-
               ElevatedButton(
                 onPressed: _submitForm,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromARGB(255, 111, 97, 239),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 40,
-                    vertical: 12,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                ),
-                child: const Text(
+                style: Theme.of(context).elevatedButtonTheme.style,
+                child: Text(
                   'Create Event',
-                  style: TextStyle(color: Colors.white),
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    color: Theme.of(context).colorScheme.onPrimary,
+                  ),
                 ),
               ),
             ],
           ),
         ),
       ),
-      bottomNavigationBar: BottomNavBar(currentIndex: 2),
+      bottomNavigationBar: const BottomNavBar(currentIndex: 0),
     );
   }
 }

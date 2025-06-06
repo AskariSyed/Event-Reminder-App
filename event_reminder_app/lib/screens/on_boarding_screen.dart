@@ -1,3 +1,4 @@
+import 'package:event_reminder_app/screens/auth_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -46,7 +47,26 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   void _goToHome() async {
     await completeOnboarding();
-    Navigator.pushReplacementNamed(context, '/auth');
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          PageRouteBuilder(
+            transitionDuration: const Duration(milliseconds: 800),
+            pageBuilder:
+                (context, animation, secondaryAnimation) => const AuthScreen(),
+            transitionsBuilder: (
+              context,
+              animation,
+              secondaryAnimation,
+              child,
+            ) {
+              return FadeTransition(opacity: animation, child: child);
+            },
+          ),
+        );
+      }
+    });
   }
 
   Future<void> completeOnboarding() async {
@@ -54,11 +74,18 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     await prefs.setBool('onboarding_done', true);
   }
 
-  Widget _buildPage(Map<String, String> page) {
+  Widget _buildPage(Map<String, String> page, int index) {
+    final isLastPage = index == onboardingData.length - 1;
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Image.asset(page['image']!, height: 250),
+        isLastPage
+            ? Hero(
+              tag: 'hero-logo',
+              child: Image.asset(page['image']!, height: 250),
+            )
+            : Image.asset(page['image']!, height: 250),
         const SizedBox(height: 40),
         Text(
           page['title']!,
@@ -79,13 +106,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Widget _buildIndicator(int index) {
-    return Container(
+    bool isActive = _currentIndex == index;
+    return AnimatedContainer(
+      duration: const Duration(seconds: 1),
       margin: const EdgeInsets.symmetric(horizontal: 4),
-      width: _currentIndex == index ? 20 : 8,
+      width: isActive ? 20 : 8,
       height: 8,
       decoration: BoxDecoration(
-        color:
-            _currentIndex == index ? const Color(0xFF6F61EF) : Colors.grey[300],
+        color: isActive ? const Color(0xFF6F61EF) : Colors.grey[300],
         borderRadius: BorderRadius.circular(4),
       ),
     );
@@ -108,7 +136,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   });
                 },
                 itemBuilder: (context, index) {
-                  return _buildPage(onboardingData[index]);
+                  return _buildPage(onboardingData[index], index);
                 },
               ),
             ),

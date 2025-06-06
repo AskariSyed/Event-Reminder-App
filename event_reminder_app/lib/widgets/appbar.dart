@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 
-AppBar buildAppBar(String title) {
+AppBar buildAppBar(String title, BuildContext context) {
   return AppBar(
-    backgroundColor: const Color(0xFFF1F4F8),
+    backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
     automaticallyImplyLeading: false,
     title: Text(
       title,
-      style: TextStyle(
-        fontFamily: 'Outfit',
-        color: Color(0xFF15161E),
+      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+        color: Theme.of(context).appBarTheme.foregroundColor,
         fontSize: 32.0,
         fontWeight: FontWeight.bold,
       ),
@@ -19,29 +18,27 @@ AppBar buildAppBar(String title) {
         child: Row(
           children: [
             IconButton(
-              icon: const Icon(
+              icon: Icon(
                 Icons.search_rounded,
-                color: Color(0xFF6F61EF),
+                color: Theme.of(context).primaryColor,
                 size: 24.0,
               ),
               onPressed: () {},
             ),
             const SizedBox(width: 12.0),
             IconButton(
-              icon: const Icon(
+              icon: Icon(
                 Icons.filter_list_rounded,
-                color: Color(0xFF6F61EF),
+                color: Theme.of(context).primaryColor,
                 size: 24.0,
               ),
-              onPressed: () {
-                print('Filter pressed ...');
-              },
+              onPressed: () {},
             ),
           ],
         ),
       ),
     ],
     centerTitle: false,
-    elevation: 0.0,
+    elevation: Theme.of(context).appBarTheme.elevation,
   );
 }

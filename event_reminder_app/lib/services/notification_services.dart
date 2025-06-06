@@ -4,6 +4,7 @@ import 'package:timezone/data/latest_all.dart' as tz;
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
+
 Future<void> initializeNotifications() async {
   tz.initializeTimeZones();
   const AndroidInitializationSettings androidInitSettings =
@@ -39,4 +40,8 @@ Future<void> scheduleNotification({
     matchDateTimeComponents: null,
     payload: 'event_payload',
   );
+}
+
+Future<void> cancelNotification(int id) async {
+  await flutterLocalNotificationsPlugin.cancel(id);
 }

@@ -1,17 +1,17 @@
-import 'package:event_reminder_app/widgets/BottomNavBar.dart';
-import 'package:event_reminder_app/widgets/appbar.dart';
-import 'package:flutter/material.dart';
-import 'package:table_calendar/table_calendar.dart';
-import 'package:event_reminder_app/widgets/buildEventCard.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:provider/provider.dart';
 import 'package:event_reminder_app/providers/user_provider.dart';
+import 'package:event_reminder_app/widgets/bottom_nav_bar.dart';
+import 'package:event_reminder_app/widgets/appbar.dart';
+import 'package:event_reminder_app/widgets/build_event_card.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:table_calendar/table_calendar.dart';
 
 class Calenderscreen extends StatefulWidget {
   const Calenderscreen({super.key});
 
-  static String routeName = 'CALENDER';
-  static String routePath = '/calender';
+  static const String routeName = 'CALENDER';
+  static const String routePath = '/calender';
 
   @override
   State<Calenderscreen> createState() => _CalenderScreen();
@@ -48,31 +48,32 @@ class _CalenderScreen extends State<Calenderscreen>
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
-        backgroundColor: Colors.white,
-        appBar: buildAppBar("Calender"),
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        appBar: buildAppBar('Calendar', context),
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              margin: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
-                color: Colors.grey[200],
+                color: Theme.of(context).colorScheme.surfaceContainer,
                 borderRadius: BorderRadius.circular(12),
               ),
               child: TabBar(
                 controller: _tabController,
-                labelColor: Colors.black,
-                unselectedLabelColor: Colors.grey,
-                labelStyle: TextStyle(
+                labelColor: Theme.of(context).textTheme.bodyLarge?.color,
+                unselectedLabelColor:
+                    Theme.of(context).textTheme.bodyMedium?.color,
+                labelStyle: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w500,
                 ),
                 indicator: BoxDecoration(
-                  color: Colors.white,
+                  color: Theme.of(context).cardColor,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey[300]!),
+                  border: Border.all(color: Theme.of(context).dividerColor),
                 ),
-                tabs: [Tab(text: 'Month'), Tab(text: 'Week')],
+                tabs: const [Tab(text: 'Month'), Tab(text: 'Week')],
               ),
             ),
             Expanded(
@@ -86,7 +87,7 @@ class _CalenderScreen extends State<Calenderscreen>
             ),
           ],
         ),
-        bottomNavigationBar: BottomNavBar(currentIndex: 1),
+        bottomNavigationBar: const BottomNavBar(currentIndex: 1),
       ),
     );
   }
@@ -96,7 +97,12 @@ class _CalenderScreen extends State<Calenderscreen>
     final userId = userProvider.user?.uid;
 
     if (userId == null) {
-      return Center(child: Text('User not logged in.'));
+      return Center(
+        child: Text(
+          'User not logged in.',
+          style: Theme.of(context).textTheme.bodyLarge,
+        ),
+      );
     }
 
     return SingleChildScrollView(
@@ -104,14 +110,16 @@ class _CalenderScreen extends State<Calenderscreen>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            margin: EdgeInsets.symmetric(horizontal: 16),
+            margin: const EdgeInsets.symmetric(horizontal: 16),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Theme.of(context).cardColor,
               boxShadow: [
                 BoxShadow(
                   blurRadius: 5,
-                  color: Colors.black12,
-                  offset: Offset(0, 1),
+                  color: Theme.of(
+                    context,
+                  ).shadowColor.withValues(alpha: 0.12), // Replaced withOpacity
+                  offset: const Offset(0, 1),
                 ),
               ],
             ),
@@ -129,67 +137,89 @@ class _CalenderScreen extends State<Calenderscreen>
               },
               calendarStyle: CalendarStyle(
                 todayDecoration: BoxDecoration(
-                  color: Theme.of(context).primaryColor.withAlpha(128),
+                  color: Theme.of(
+                    context,
+                  ).primaryColor.withValues(alpha: 0.5), // Replaced withAlpha
                   shape: BoxShape.circle,
                 ),
                 selectedDecoration: BoxDecoration(
                   color: Theme.of(context).primaryColor,
                   shape: BoxShape.circle,
                 ),
+                defaultTextStyle: Theme.of(context).textTheme.bodyLarge!,
+                weekendTextStyle: Theme.of(context).textTheme.bodyLarge!,
+                outsideTextStyle: Theme.of(
+                  context,
+                ).textTheme.bodyMedium!.copyWith(color: Colors.grey),
               ),
               headerStyle: HeaderStyle(
                 formatButtonVisible: false,
-                titleTextStyle: TextStyle(
+                titleTextStyle: Theme.of(context).textTheme.bodyLarge!.copyWith(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               daysOfWeekStyle: DaysOfWeekStyle(
-                weekdayStyle: TextStyle(fontSize: 14),
-                weekendStyle: TextStyle(fontSize: 14),
+                weekdayStyle: Theme.of(
+                  context,
+                ).textTheme.bodyMedium!.copyWith(fontSize: 14),
+                weekendStyle: Theme.of(
+                  context,
+                ).textTheme.bodyMedium!.copyWith(fontSize: 14),
               ),
             ),
           ),
           Padding(
-            padding: EdgeInsets.fromLTRB(16, 12, 0, 0),
+            padding: const EdgeInsets.fromLTRB(16, 12, 0, 0),
             child: Text(
               'Coming Up',
-              style: TextStyle(fontSize: 14, color: Colors.grey),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium!.copyWith(fontSize: 14),
             ),
           ),
-          // Fetch events for the selected day
           StreamBuilder<QuerySnapshot>(
             stream:
                 FirebaseFirestore.instance
                     .collection('events')
                     .where('userId', isEqualTo: userId)
-                    .where(
-                      'date',
-                      isEqualTo: _formatDateToString(_selectedDay),
-                    ) // Call the helper function
+                    .where('date', isEqualTo: _formatDateToString(_selectedDay))
                     .snapshots(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(child: CircularProgressIndicator());
+                return const Center(child: CircularProgressIndicator());
               }
 
               if (snapshot.hasError) {
-                return Center(child: Text('Error fetching events.'));
+                return Center(
+                  child: Text(
+                    'Error fetching events.',
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
+                );
               }
 
               final events = snapshot.data?.docs ?? [];
               if (events.isEmpty) {
-                return Center(child: Text('No upcoming events.'));
+                return Center(
+                  child: Text(
+                    'No upcoming events.',
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
+                );
               }
 
               return ListView.builder(
                 padding: EdgeInsets.zero,
                 shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
+                physics: const NeverScrollableScrollPhysics(),
                 itemCount: events.length,
                 itemBuilder: (context, index) {
-                  final event = events[index].data() as Map<String, dynamic>;
-                  return buildEventCard(event);
+                  final eventDoc = events[index];
+                  final event = eventDoc.data() as Map<String, dynamic>;
+                  final docId = eventDoc.id;
+
+                  return buildEventCard(event, context, docId);
                 },
               );
             },
@@ -199,11 +229,9 @@ class _CalenderScreen extends State<Calenderscreen>
     );
   }
 
-  // Helper function to format the date to string
   String _formatDateToString(DateTime? date) {
     if (date == null) return '';
 
-    // Get the weekday and month names
     final dayNames = [
       'Sunday',
       'Monday',

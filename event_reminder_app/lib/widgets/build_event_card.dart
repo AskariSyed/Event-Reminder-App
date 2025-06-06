@@ -1,3 +1,4 @@
+import 'package:event_reminder_app/screens/edit_event_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -27,8 +28,9 @@ String calculateRemainingTime(
     final period = timeParts[1].toUpperCase();
 
     final timeComponents = timeValue.split(':');
-    if (timeComponents.length != 2)
+    if (timeComponents.length != 2) {
       throw FormatException('Invalid time components');
+    }
 
     int hour = int.parse(timeComponents[0]);
     final minute = int.parse(timeComponents[1]);
@@ -59,50 +61,57 @@ String calculateRemainingTime(
     }
 
     if (diff.isNegative) return 'Passed';
-    if (diff.inDays > 0)
+    if (diff.inDays > 0) {
       return '${diff.inDays} day${diff.inDays > 1 ? 's' : ''} left';
-    if (diff.inHours > 0)
+    }
+    if (diff.inHours > 0) {
       return '${diff.inHours} hour${diff.inHours > 1 ? 's' : ''} left';
-    if (diff.inMinutes > 0)
+    }
+    if (diff.inMinutes > 0) {
       return '${diff.inMinutes} min${diff.inMinutes > 1 ? 's' : ''} left';
-    return 'Less than a minute left';
+    }
+    return '< 1 min left'; // Shortened for consistency
   } catch (e) {
     return 'TBC';
   }
 }
 
-Widget buildEventCard(Map<String, dynamic> event) {
+Widget buildEventCard(
+  Map<String, dynamic> event,
+  BuildContext context,
+  String docId,
+) {
   final remainingTime = calculateRemainingTime(event);
   final eventStatus = calculateRemainingTime(event, returnStatus: true);
 
-  // Determine color based on event status
+  // Determine color based on event status, using theme colors where possible
   final Color timeColor;
   switch (eventStatus) {
     case 'passed':
-      timeColor = Colors.grey; // Grey for past events
+      timeColor = Theme.of(context).colorScheme.secondary.withOpacity(0.6);
       break;
     case 'near':
-      timeColor = Colors.orange; // Orange for events happening soon (<1 hour)
+      timeColor = Colors.orange; // Keep orange for urgency
       break;
     case 'soon':
-      timeColor = Colors.blue; // Blue for events happening today
+      timeColor = Theme.of(context).colorScheme.primary.withOpacity(0.7);
       break;
     case 'future':
-      timeColor = const Color(0xFF6F61EF); // Default purple for future events
+      timeColor = Theme.of(context).primaryColor; // 0xFF6F61EF
       break;
     default:
-      timeColor = const Color(0xFF6F61EF); // Default color
+      timeColor = Theme.of(context).primaryColor;
   }
 
   return Container(
     width: double.infinity,
     decoration: BoxDecoration(
-      color: Colors.white,
-      boxShadow: const [
+      color: Theme.of(context).cardColor, // White (light), 0xFF1E1E1E (dark)
+      boxShadow: [
         BoxShadow(
           blurRadius: 4.0,
-          color: Color(0x1A000000),
-          offset: Offset(0.0, 2.0),
+          color: Theme.of(context).shadowColor.withOpacity(0.1),
+          offset: const Offset(0.0, 2.0),
         ),
       ],
       borderRadius: BorderRadius.circular(12.0),
@@ -121,45 +130,62 @@ Widget buildEventCard(Map<String, dynamic> event) {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Container(
-                      width: remainingTime.length > 6 ? 100.0 : 80.0,
-                      height: 30.0,
-                      decoration: BoxDecoration(
-                        color: timeColor,
-                        borderRadius: BorderRadius.circular(15.0),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(4.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(
-                              Icons.timer_rounded,
-                              color: Colors.white,
-                              size: 16.0,
-                            ),
-                            const SizedBox(width: 4.0),
-                            Text(
-                              remainingTime,
-                              style: const TextStyle(
-                                fontFamily: 'Plus Jakarta Sans',
-                                color: Colors.white,
-                                fontSize: 12.0,
-                                fontWeight: FontWeight.w600,
+                    Flexible(
+                      child: Container(
+                        height: 30.0,
+                        decoration: BoxDecoration(
+                          color: timeColor,
+                          borderRadius: BorderRadius.circular(15.0),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8.0,
+                            vertical: 4.0,
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.timer_rounded,
+                                color: Theme.of(context).colorScheme.onPrimary,
+                                size: 16.0,
                               ),
-                            ),
-                          ],
+                              const SizedBox(width: 4.0),
+                              Text(
+                                remainingTime,
+                                style: Theme.of(
+                                  context,
+                                ).textTheme.bodySmall?.copyWith(
+                                  color:
+                                      Theme.of(context).colorScheme.onPrimary,
+                                  fontSize: 12.0,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.edit_rounded,
-                        color: Color(0xFF6F61EF),
+                        color: Theme.of(context).primaryColor,
                         size: 20.0,
                       ),
                       onPressed: () {
-                        // Edit button action here
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder:
+                                (context) => EditEventScreen(
+                                  event: event,
+                                  documentId: docId,
+                                ),
+                          ),
+                        );
                       },
                     ),
                   ],
@@ -168,9 +194,7 @@ Widget buildEventCard(Map<String, dynamic> event) {
                 // Title
                 Text(
                   event['title'] ?? '',
-                  style: const TextStyle(
-                    fontFamily: 'Plus Jakarta Sans',
-                    color: Color(0xFF15161E),
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                     fontSize: 18.0,
                     fontWeight: FontWeight.bold,
                   ),
@@ -179,19 +203,17 @@ Widget buildEventCard(Map<String, dynamic> event) {
                 // Date row
                 Row(
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.calendar_today_rounded,
-                      color: Color(0xFF606A85),
+                      color: Theme.of(context).textTheme.bodyMedium?.color,
                       size: 16.0,
                     ),
                     const SizedBox(width: 8.0),
                     Text(
                       event['date'] ?? '',
-                      style: const TextStyle(
-                        fontFamily: 'Plus Jakarta Sans',
-                        color: Color(0xFF606A85),
-                        fontSize: 14.0,
-                      ),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodyMedium?.copyWith(fontSize: 14.0),
                     ),
                   ],
                 ),
@@ -199,19 +221,17 @@ Widget buildEventCard(Map<String, dynamic> event) {
                 // Time row
                 Row(
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.access_time_rounded,
-                      color: Color(0xFF606A85),
+                      color: Theme.of(context).textTheme.bodyMedium?.color,
                       size: 16.0,
                     ),
                     const SizedBox(width: 8.0),
                     Text(
                       event['time'] ?? '',
-                      style: const TextStyle(
-                        fontFamily: 'Plus Jakarta Sans',
-                        color: Color(0xFF606A85),
-                        fontSize: 14.0,
-                      ),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodyMedium?.copyWith(fontSize: 14.0),
                     ),
                   ],
                 ),
@@ -219,20 +239,18 @@ Widget buildEventCard(Map<String, dynamic> event) {
                 // Location row
                 Row(
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.location_on_outlined,
-                      color: Color(0xFF606A85),
+                      color: Theme.of(context).textTheme.bodyMedium?.color,
                       size: 16.0,
                     ),
                     const SizedBox(width: 8.0),
                     Expanded(
                       child: Text(
                         event['location'] ?? '',
-                        style: const TextStyle(
-                          fontFamily: 'Plus Jakarta Sans',
-                          color: Color(0xFF606A85),
-                          fontSize: 14.0,
-                        ),
+                        style: Theme.of(
+                          context,
+                        ).textTheme.bodyMedium?.copyWith(fontSize: 14.0),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
@@ -242,11 +260,9 @@ Widget buildEventCard(Map<String, dynamic> event) {
                 // Description
                 Text(
                   event['description'] ?? '',
-                  style: const TextStyle(
-                    fontFamily: 'Plus Jakarta Sans',
-                    color: Color(0xFF15161E),
-                    fontSize: 14.0,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyLarge?.copyWith(fontSize: 14.0),
                 ),
               ],
             ),

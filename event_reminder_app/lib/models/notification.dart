@@ -68,7 +68,6 @@ class Notification {
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         matchDateTimeComponents: DateTimeComponents.dateAndTime,
       );
-      print('Notification scheduled for event $eventID at $tzScheduledDate');
     } catch (e) {
       print('Error scheduling notification: $e');
     }

@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:event_reminder_app/models/app_user.dart';
-import 'package:event_reminder_app/providers/user_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:event_reminder_app/providers/user_provider.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -17,6 +17,7 @@ class _AuthScreenState extends State<AuthScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool isLogin = true;
+
   @override
   void initState() {
     super.initState();
@@ -33,10 +34,13 @@ class _AuthScreenState extends State<AuthScreen> {
         photoUrl: user.photoURL,
       );
 
-      // Defer state changes and navigation
+      // Defer state changes and navigation with mounted check
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        Provider.of<UserProvider>(context, listen: false).setUser(appUser);
-        Navigator.pushReplacementNamed(context, '/home');
+        if (mounted) {
+          // Check if widget is still mounted
+          Provider.of<UserProvider>(context, listen: false).setUser(appUser);
+          Navigator.pushReplacementNamed(context, '/home');
+        }
       });
     }
   }
@@ -57,11 +61,17 @@ class _AuthScreenState extends State<AuthScreen> {
           password: _passwordController.text.trim(),
         );
       }
-      Navigator.pushReplacementNamed(context, '/home');
+      if (mounted) {
+        // Check if widget is still mounted
+        Navigator.pushReplacementNamed(context, '/home');
+      }
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error: $e')));
+      if (mounted) {
+        // Check if widget is still mounted
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
+      }
     }
   }
 
@@ -89,21 +99,28 @@ class _AuthScreenState extends State<AuthScreen> {
           photoUrl: user.photoURL,
         );
 
-        // ✅ Set user in Provider
-        Provider.of<UserProvider>(context, listen: false).setUser(appUser);
-
-        Navigator.pushReplacementNamed(context, '/home');
+        if (mounted) {
+          // Check if widget is still mounted
+          Provider.of<UserProvider>(context, listen: false).setUser(appUser);
+          Navigator.pushReplacementNamed(context, '/home');
+        }
       }
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Google Sign-in failed: $e')));
+      if (mounted) {
+        // Check if widget is still mounted
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Google Sign-in failed: $e')));
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final logo = Image.asset('lib/assets/notify.png', height: 100);
+    final logo = Hero(
+      tag: 'hero-logo',
+      child: Image.asset('lib/assets/notify.png', height: 100),
+    );
 
     return Scaffold(
       backgroundColor: Colors.blue.shade50,

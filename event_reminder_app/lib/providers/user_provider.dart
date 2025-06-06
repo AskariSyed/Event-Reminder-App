@@ -8,7 +8,7 @@ class UserProvider with ChangeNotifier {
 
   AppUser? get user => _user;
 
-  void setUser(AppUser user) async {
+  Future<void> setUser(AppUser user) async {
     _user = user;
     notifyListeners();
     await _fetchAndScheduleUserEvents();
