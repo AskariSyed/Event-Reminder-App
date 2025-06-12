@@ -13,11 +13,6 @@ class AuthScreen extends StatefulWidget {
 }
 
 class _AuthScreenState extends State<AuthScreen> {
-  final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  bool isLogin = true;
-
   @override
   void initState() {
     super.initState();
@@ -33,45 +28,12 @@ class _AuthScreenState extends State<AuthScreen> {
         email: user.email,
         photoUrl: user.photoURL,
       );
-
-      // Defer state changes and navigation with mounted check
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) {
-          // Check if widget is still mounted
           Provider.of<UserProvider>(context, listen: false).setUser(appUser);
           Navigator.pushReplacementNamed(context, '/home');
         }
       });
-    }
-  }
-
-  Future<void> _submit() async {
-    final isValid = _formKey.currentState!.validate();
-    if (!isValid) return;
-
-    try {
-      if (isLogin) {
-        await FirebaseAuth.instance.signInWithEmailAndPassword(
-          email: _emailController.text.trim(),
-          password: _passwordController.text.trim(),
-        );
-      } else {
-        await FirebaseAuth.instance.createUserWithEmailAndPassword(
-          email: _emailController.text.trim(),
-          password: _passwordController.text.trim(),
-        );
-      }
-      if (mounted) {
-        // Check if widget is still mounted
-        Navigator.pushReplacementNamed(context, '/home');
-      }
-    } catch (e) {
-      if (mounted) {
-        // Check if widget is still mounted
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error: $e')));
-      }
     }
   }
 
@@ -100,14 +62,12 @@ class _AuthScreenState extends State<AuthScreen> {
         );
 
         if (mounted) {
-          // Check if widget is still mounted
           Provider.of<UserProvider>(context, listen: false).setUser(appUser);
           Navigator.pushReplacementNamed(context, '/home');
         }
       }
     } catch (e) {
       if (mounted) {
-        // Check if widget is still mounted
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(SnackBar(content: Text('Google Sign-in failed: $e')));
@@ -131,68 +91,15 @@ class _AuthScreenState extends State<AuthScreen> {
             children: [
               logo,
               const SizedBox(height: 20),
-              Text(
-                isLogin ? 'Sign In' : 'Sign Up',
-                style: const TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                ),
+              const Text(
+                'Sign in with Google',
+                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
               ),
-              const SizedBox(height: 16),
-              Form(
-                key: _formKey,
-                child: Column(
-                  children: [
-                    TextFormField(
-                      controller: _emailController,
-                      decoration: const InputDecoration(
-                        labelText: 'Email',
-                        border: OutlineInputBorder(),
-                      ),
-                      validator:
-                          (value) =>
-                              value!.contains('@') ? null : 'Invalid email',
-                    ),
-                    const SizedBox(height: 12),
-                    TextFormField(
-                      controller: _passwordController,
-                      obscureText: true,
-                      decoration: const InputDecoration(
-                        labelText: 'Password',
-                        border: OutlineInputBorder(),
-                      ),
-                      validator:
-                          (value) =>
-                              value != null && value.length >= 6
-                                  ? null
-                                  : 'Password too short',
-                    ),
-                    const SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: _submit,
-                      child: Text(isLogin ? 'Login' : 'Register'),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 24),
               OutlinedButton.icon(
                 onPressed: _signInWithGoogle,
                 icon: const Icon(Icons.login),
                 label: const Text('Continue with Google'),
-              ),
-              const SizedBox(height: 12),
-              TextButton(
-                onPressed: () {
-                  setState(() {
-                    isLogin = !isLogin;
-                  });
-                },
-                child: Text(
-                  isLogin
-                      ? "Don't have an account? Register"
-                      : "Already have an account? Login",
-                ),
               ),
             ],
           ),

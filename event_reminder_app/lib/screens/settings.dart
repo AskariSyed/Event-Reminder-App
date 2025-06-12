@@ -1,10 +1,14 @@
 import 'package:event_reminder_app/providers/theme_provider.dart';
+import 'package:event_reminder_app/services/notification_services.dart';
 import 'package:event_reminder_app/widgets/bottom_nav_bar.dart';
 import 'package:event_reminder_app/widgets/appbar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
+import 'package:timezone/timezone.dart' as tz;
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -15,6 +19,207 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
   bool notificationsEnabled = true;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize notificationsEnabled based on existing events
+    _checkNotificationStatus();
+  }
+
+  Future<void> _checkNotificationStatus() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    try {
+      final querySnapshot =
+          await FirebaseFirestore.instance
+              .collection('events')
+              .where('userId', isEqualTo: user.uid)
+              .get();
+      // Consider notifications enabled if at least one event has a notificationId
+      bool hasNotifications = querySnapshot.docs.any(
+        (doc) => doc['notificationId'] != null,
+      );
+      setState(() {
+        notificationsEnabled = hasNotifications;
+      });
+    } catch (e) {
+      print('Debug: Error checking notification status: $e');
+    }
+  }
+
+  Future<void> _toggleNotifications(bool value) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Please log in to manage notifications.',
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+            ),
+            backgroundColor: Theme.of(context).colorScheme.surface,
+          ),
+        );
+      }
+      return;
+    }
+
+    try {
+      final querySnapshot =
+          await FirebaseFirestore.instance
+              .collection('events')
+              .where('userId', isEqualTo: user.uid)
+              .get();
+
+      if (!value) {
+        for (var doc in querySnapshot.docs) {
+          final event = doc.data();
+          if (event['notificationId'] != null) {
+            await cancelNotification(event['notificationId']);
+            await FirebaseFirestore.instance
+                .collection('events')
+                .doc(doc.id)
+                .update({'notificationId': null});
+          }
+        }
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'All notifications disabled.',
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+              ),
+              backgroundColor: Theme.of(context).colorScheme.surface,
+            ),
+          );
+        }
+      } else {
+        for (var doc in querySnapshot.docs) {
+          final event = doc.data();
+          if (event['date'] != null && event['time'] != null) {
+            try {
+              final date = DateFormat(
+                'EEEE, MMMM d, yyyy',
+              ).parse(event['date']);
+              final time = _parseTime(event['time']);
+              if (time == null) continue;
+
+              final combinedDateTime = DateTime(
+                date.year,
+                date.month,
+                date.day,
+                time.hour,
+                time.minute,
+              );
+
+              final tzScheduledDateTime = tz.TZDateTime.from(
+                combinedDateTime,
+                tz.local,
+              );
+              if (tzScheduledDateTime.isAfter(tz.TZDateTime.now(tz.local))) {
+                final notificationId =
+                    DateTime.now().millisecondsSinceEpoch ~/ 1000;
+                await scheduleNotification(
+                  id: notificationId,
+                  title: event['title'] ?? 'Event Reminder',
+                  body:
+                      '📍 ${event['location'] ?? ''}\n📝 ${event['description'] ?? ''}',
+                  scheduledDateTime: combinedDateTime,
+                );
+                await FirebaseFirestore.instance
+                    .collection('events')
+                    .doc(doc.id)
+                    .update({'notificationId': notificationId});
+              }
+            } catch (e) {
+              print(
+                'Debug: Error scheduling notification for event ${event['id']}: $e',
+              );
+            }
+          }
+        }
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Notifications enabled for all future events.',
+                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+              ),
+              backgroundColor: Theme.of(context).colorScheme.surface,
+            ),
+          );
+        }
+      }
+
+      setState(() {
+        notificationsEnabled = value;
+      });
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Error managing notifications: $e',
+              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+            ),
+            backgroundColor: Theme.of(context).colorScheme.surface,
+          ),
+        );
+      }
+    }
+  }
+
+  TimeOfDay? _parseTime(String? timeStr) {
+    if (timeStr == null || timeStr.isEmpty) return null;
+    try {
+      final cleanedTimeString =
+          timeStr
+              .replaceAll(
+                RegExp(r'[\u202F\u00A0\u2007\u2060\uFEFF\u200B]'),
+                ' ',
+              )
+              .replaceAll(RegExp(r'[^\x00-\x7F]'), '')
+              .replaceAll(RegExp(r'\s+'), ' ')
+              .trim();
+      final timeParts = cleanedTimeString.split(' ');
+      if (timeParts.length != 2) {
+        throw FormatException('Invalid time format: $cleanedTimeString');
+      }
+
+      final timeValue = timeParts[0];
+      final period = timeParts[1].toUpperCase();
+
+      final timeComponents = timeValue.split(':');
+      if (timeComponents.length != 2) {
+        throw FormatException('Invalid time components: $timeValue');
+      }
+
+      int hour = int.parse(timeComponents[0]);
+      final minute = int.parse(timeComponents[1]);
+
+      // Convert to 24-hour format
+      if (period == 'PM' && hour != 12) {
+        hour += 12;
+      } else if (period == 'AM' && hour == 12) {
+        hour = 0;
+      }
+
+      return TimeOfDay(hour: hour, minute: minute);
+    } catch (e) {
+      print('Debug: Error parsing time "$timeStr": $e');
+      return null;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -111,11 +316,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         ),
                         Switch(
                           value: notificationsEnabled,
-                          onChanged: (value) {
-                            setState(() {
-                              notificationsEnabled = value;
-                            });
-                          },
+                          onChanged: _toggleNotifications,
                           activeColor: Theme.of(context).primaryColor,
                         ),
                       ],
@@ -275,7 +476,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                         Theme.of(context).textTheme.bodyMedium,
                                   ),
                                   Text(
-                                    'Askari',
+                                    'Askari:Quratulain',
                                     style:
                                         Theme.of(context).textTheme.bodyMedium,
                                   ),

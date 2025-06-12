@@ -27,6 +27,7 @@ class _EditEventScreenState extends State<EditEventScreen> {
   late DateTime? selectedDate;
   late TimeOfDay? selectedTime;
   late bool notificationEnabled;
+  bool _isLoading = false; // Track loading state
 
   @override
   void initState() {
@@ -145,19 +146,26 @@ class _EditEventScreenState extends State<EditEventScreen> {
     }
   }
 
-  void _submitForm() async {
+  Future<void> _submitForm() async {
     if (_formKey.currentState!.validate() &&
         selectedDate != null &&
         selectedTime != null) {
+      setState(() {
+        _isLoading = true; // Show loading indicator
+      });
+
       _formKey.currentState!.save();
 
       final formattedDate = DateFormat(
         'EEEE, MMMM d, yyyy',
       ).format(selectedDate!);
-
       final timeFormatted = selectedTime!.format(context);
       final user = FirebaseAuth.instance.currentUser;
+
       if (user == null) {
+        setState(() {
+          _isLoading = false; // Hide loading indicator
+        });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
@@ -198,47 +206,67 @@ class _EditEventScreenState extends State<EditEventScreen> {
         'notificationId': notificationEnabled ? notificationId : null,
       };
 
-      await FirebaseFirestore.instance
-          .collection('events')
-          .doc(widget.documentId) // Use the correct documentId
-          .update(updatedEvent);
+      try {
+        await FirebaseFirestore.instance
+            .collection('events')
+            .doc(widget.documentId)
+            .update(updatedEvent);
 
-      if (notificationEnabled && notificationId != null) {
-        if (widget.event['notificationId'] != null) {
+        if (notificationEnabled && notificationId != null) {
+          if (widget.event['notificationId'] != null) {
+            await cancelNotification(widget.event['notificationId']);
+          }
+          // Schedule new notification
+          await scheduleNotification(
+            id: notificationId,
+            title: title,
+            body: '📍 $location\n📝 $description',
+            scheduledDateTime: combinedDateTime,
+          );
+        } else if (!notificationEnabled &&
+            widget.event['notificationId'] != null) {
           await cancelNotification(widget.event['notificationId']);
         }
-        // Schedule new notification
-        await scheduleNotification(
-          id: notificationId,
-          title: 'Event: $title',
-          body: 'Reminder for your event at $timeFormatted',
-          scheduledDateTime: combinedDateTime,
-        );
-      } else if (!notificationEnabled &&
-          widget.event['notificationId'] != null) {
-        // Cancel existing notification if notification is disabled
-        await cancelNotification(widget.event['notificationId']);
-      }
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                "Event Updated Successfully",
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurface,
+
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  "Event Updated Successfully",
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
                 ),
+                backgroundColor: Theme.of(context).colorScheme.surface,
               ),
-              backgroundColor: Theme.of(context).colorScheme.surface,
-            ),
-          );
-        }
-      });
-      WidgetsBinding.instance.addPostFrameCallback((_) {
+            );
+            Navigator.pop(context, updatedEvent);
+          }
+        });
+      } catch (e) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                  "Error updating event: $e",
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
+                backgroundColor: Theme.of(context).colorScheme.surface,
+              ),
+            );
+          }
+        });
+      } finally {
         if (mounted) {
-          Navigator.pop(context, updatedEvent);
+          setState(() {
+            _isLoading = false; // Hide loading indicator
+          });
         }
-      });
+      }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -387,16 +415,18 @@ class _EditEventScreenState extends State<EditEventScreen> {
                 ),
               ),
               const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: _submitForm,
-                style: Theme.of(context).elevatedButtonTheme.style,
-                child: Text(
-                  'Update Event',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyLarge?.copyWith(color: Colors.white),
-                ),
-              ),
+              _isLoading
+                  ? const CircularProgressIndicator()
+                  : ElevatedButton(
+                    onPressed: _submitForm,
+                    style: Theme.of(context).elevatedButtonTheme.style,
+                    child: Text(
+                      'Update Event',
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodyLarge?.copyWith(color: Colors.white),
+                    ),
+                  ),
             ],
           ),
         ),

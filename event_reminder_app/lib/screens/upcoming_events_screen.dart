@@ -1,11 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:event_reminder_app/providers/user_provider.dart';
 import 'package:event_reminder_app/screens/create_event_screen.dart';
+import 'package:event_reminder_app/services/notification_services.dart';
 import 'package:event_reminder_app/widgets/bottom_nav_bar.dart';
 import 'package:event_reminder_app/widgets/build_event_card.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:timezone/timezone.dart' as tz;
 
 class UpcomingEventScreenWidget extends StatefulWidget {
   const UpcomingEventScreenWidget({super.key});
@@ -24,6 +27,111 @@ class _UpcomingEventScreenWidgetState extends State<UpcomingEventScreenWidget>
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this, initialIndex: 1);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final userId = FirebaseAuth.instance.currentUser?.uid;
+      if (userId != null) {
+        _scheduleExistingEventNotifications(userId);
+      }
+    });
+  }
+
+  Future<void> _scheduleExistingEventNotifications(String userId) async {
+    try {
+      final querySnapshot =
+          await FirebaseFirestore.instance
+              .collection('events')
+              .where('userId', isEqualTo: userId)
+              .get();
+
+      for (var doc in querySnapshot.docs) {
+        final event = doc.data();
+        if (event['notificationId'] != null &&
+            event['date'] != null &&
+            event['time'] != null) {
+          try {
+            // Parse date and time
+            final date = DateFormat('EEEE, MMMM d, yyyy').parse(event['date']);
+            final time = _parseTime(event['time']);
+            if (time == null) continue;
+
+            final combinedDateTime = DateTime(
+              date.year,
+              date.month,
+              date.day,
+              time.hour,
+              time.minute,
+            );
+
+            final tzScheduledDateTime = tz.TZDateTime.from(
+              combinedDateTime,
+              tz.local,
+            );
+            // Only schedule notifications for future events
+            if (tzScheduledDateTime.isAfter(tz.TZDateTime.now(tz.local))) {
+              await scheduleNotification(
+                id: event['notificationId'],
+                title: event['title'] ?? 'Event Reminder',
+                body:
+                    '📍 ${event['location'] ?? ''}\n📝 ${event['description'] ?? ''}',
+                scheduledDateTime: combinedDateTime,
+              );
+            }
+          } catch (e) {
+            print(
+              'Debug: Error scheduling notification for event ${event['id']}: $e',
+            );
+          }
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error scheduling notifications: $e')),
+        );
+      }
+    }
+  }
+
+  TimeOfDay? _parseTime(String? timeStr) {
+    if (timeStr == null || timeStr.isEmpty) return null;
+    try {
+      final cleanedTimeString =
+          timeStr
+              .replaceAll(
+                RegExp(r'[\u202F\u00A0\u2007\u2060\uFEFF\u200B]'),
+                ' ',
+              )
+              .replaceAll(RegExp(r'[^\x00-\x7F]'), '')
+              .replaceAll(RegExp(r'\s+'), ' ')
+              .trim();
+      final timeParts = cleanedTimeString.split(' ');
+      if (timeParts.length != 2) {
+        throw FormatException('Invalid time format: $cleanedTimeString');
+      }
+
+      final timeValue = timeParts[0];
+      final period = timeParts[1].toUpperCase();
+
+      final timeComponents = timeValue.split(':');
+      if (timeComponents.length != 2) {
+        throw FormatException('Invalid time components: $timeValue');
+      }
+
+      int hour = int.parse(timeComponents[0]);
+      final minute = int.parse(timeComponents[1]);
+
+      // Convert to 24-hour format
+      if (period == 'PM' && hour != 12) {
+        hour += 12;
+      } else if (period == 'AM' && hour == 12) {
+        hour = 0;
+      }
+
+      return TimeOfDay(hour: hour, minute: minute);
+    } catch (e) {
+      print('Debug: Error parsing time "$timeStr": $e');
+      return null;
+    }
   }
 
   @override
@@ -43,6 +151,7 @@ class _UpcomingEventScreenWidgetState extends State<UpcomingEventScreenWidget>
         key: scaffoldKey,
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         appBar: AppBar(
+          centerTitle: true,
           backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
           foregroundColor: Theme.of(context).appBarTheme.foregroundColor,
           elevation: Theme.of(context).appBarTheme.elevation,

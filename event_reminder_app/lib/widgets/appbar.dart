@@ -12,33 +12,7 @@ AppBar buildAppBar(String title, BuildContext context) {
         fontWeight: FontWeight.bold,
       ),
     ),
-    actions: [
-      Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        child: Row(
-          children: [
-            IconButton(
-              icon: Icon(
-                Icons.search_rounded,
-                color: Theme.of(context).primaryColor,
-                size: 24.0,
-              ),
-              onPressed: () {},
-            ),
-            const SizedBox(width: 12.0),
-            IconButton(
-              icon: Icon(
-                Icons.filter_list_rounded,
-                color: Theme.of(context).primaryColor,
-                size: 24.0,
-              ),
-              onPressed: () {},
-            ),
-          ],
-        ),
-      ),
-    ],
-    centerTitle: false,
+    centerTitle: true,
     elevation: Theme.of(context).appBarTheme.elevation,
   );
 }

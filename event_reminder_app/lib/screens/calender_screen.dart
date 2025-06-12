@@ -27,6 +27,13 @@ class _CalenderScreen extends State<Calenderscreen>
   @override
   void initState() {
     super.initState();
+    // Enable Firestore offline persistence
+    FirebaseFirestore.instance.settings = const Settings(
+      persistenceEnabled: true,
+    );
+    // Pre-select today's date
+    _selectedDay = DateTime.now();
+    _focusedDay = _selectedDay!;
     _tabController = TabController(length: 2, vsync: this)..addListener(() {
       setState(() {
         _calendarFormat =
@@ -116,9 +123,7 @@ class _CalenderScreen extends State<Calenderscreen>
               boxShadow: [
                 BoxShadow(
                   blurRadius: 5,
-                  color: Theme.of(
-                    context,
-                  ).shadowColor.withValues(alpha: 0.12), // Replaced withOpacity
+                  color: Theme.of(context).shadowColor.withValues(alpha: 0.12),
                   offset: const Offset(0, 1),
                 ),
               ],
@@ -137,9 +142,7 @@ class _CalenderScreen extends State<Calenderscreen>
               },
               calendarStyle: CalendarStyle(
                 todayDecoration: BoxDecoration(
-                  color: Theme.of(
-                    context,
-                  ).primaryColor.withValues(alpha: 0.5), // Replaced withAlpha
+                  color: Theme.of(context).primaryColor.withValues(alpha: 0.5),
                   shape: BoxShape.circle,
                 ),
                 selectedDecoration: BoxDecoration(
@@ -193,8 +196,9 @@ class _CalenderScreen extends State<Calenderscreen>
               if (snapshot.hasError) {
                 return Center(
                   child: Text(
-                    'Error fetching events.',
+                    'Error fetching events. Changes may be saved offline and will sync later.',
                     style: Theme.of(context).textTheme.bodyLarge,
+                    textAlign: TextAlign.center,
                   ),
                 );
               }

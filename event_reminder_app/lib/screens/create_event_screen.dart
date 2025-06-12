@@ -139,15 +139,12 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
     };
 
     try {
-      // Save event to Firestore
       await FirebaseFirestore.instance.collection('events').add(newEvent);
-
-      // Schedule notification if enabled
       if (notificationEnabled) {
         await scheduleNotification(
           id: notificationId,
-          title: 'Event: $title',
-          body: 'Reminder for your event at $formattedTime',
+          title: title,
+          body: '📍 $location\n📝 $description',
           scheduledDateTime: combinedDateTime,
         );
       }
