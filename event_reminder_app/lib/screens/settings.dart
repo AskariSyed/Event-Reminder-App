@@ -276,10 +276,6 @@ class _SettingsPageState extends State<SettingsPage> {
                               ),
                             ),
                             const SizedBox(height: 4),
-                            Text(
-                              'Manage your profile',
-                              style: Theme.of(context).textTheme.bodyMedium,
-                            ),
                           ],
                         ),
                       ],
