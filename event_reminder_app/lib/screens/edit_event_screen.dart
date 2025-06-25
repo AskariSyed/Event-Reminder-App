@@ -27,12 +27,12 @@ class _EditEventScreenState extends State<EditEventScreen> {
   late DateTime? selectedDate;
   late TimeOfDay? selectedTime;
   late bool notificationEnabled;
-  bool _isLoading = false; // Track loading state
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    // Initialize fields with event data
+
     title = widget.event['title'] ?? '';
     location = widget.event['location'] ?? '';
     description = widget.event['description'] ?? '';

@@ -27,11 +27,9 @@ class _CalenderScreen extends State<Calenderscreen>
   @override
   void initState() {
     super.initState();
-    // Enable Firestore offline persistence
     FirebaseFirestore.instance.settings = const Settings(
       persistenceEnabled: true,
     );
-    // Pre-select today's date
     _selectedDay = DateTime.now();
     _focusedDay = _selectedDay!;
     _tabController = TabController(length: 2, vsync: this)..addListener(() {

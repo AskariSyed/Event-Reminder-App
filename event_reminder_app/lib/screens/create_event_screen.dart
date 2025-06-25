@@ -89,8 +89,6 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       }
       return;
     }
-
-    // Combine date and time
     final combinedDateTime = DateTime(
       selectedDate!.year,
       selectedDate!.month,
@@ -117,7 +115,6 @@ class _CreateEventScreenState extends State<CreateEventScreen> {
       return;
     }
 
-    // Format date and time
     final dateFormat = DateFormat('EEEE, MMMM d, yyyy');
     final timeFormat = DateFormat('h:mm a');
     final formattedDate = dateFormat.format(combinedDateTime);
