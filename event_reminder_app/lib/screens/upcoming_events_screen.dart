@@ -49,7 +49,6 @@ class _UpcomingEventScreenWidgetState extends State<UpcomingEventScreenWidget>
             event['date'] != null &&
             event['time'] != null) {
           try {
-            // Parse date and time
             final date = DateFormat('EEEE, MMMM d, yyyy').parse(event['date']);
             final time = _parseTime(event['time']);
             if (time == null) continue;
@@ -66,7 +65,6 @@ class _UpcomingEventScreenWidgetState extends State<UpcomingEventScreenWidget>
               combinedDateTime,
               tz.local,
             );
-            // Only schedule notifications for future events
             if (tzScheduledDateTime.isAfter(tz.TZDateTime.now(tz.local))) {
               await scheduleNotification(
                 id: event['notificationId'],
@@ -119,8 +117,6 @@ class _UpcomingEventScreenWidgetState extends State<UpcomingEventScreenWidget>
 
       int hour = int.parse(timeComponents[0]);
       final minute = int.parse(timeComponents[1]);
-
-      // Convert to 24-hour format
       if (period == 'PM' && hour != 12) {
         hour += 12;
       } else if (period == 'AM' && hour == 12) {

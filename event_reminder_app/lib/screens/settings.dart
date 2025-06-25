@@ -23,7 +23,6 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   void initState() {
     super.initState();
-    // Initialize notificationsEnabled based on existing events
     _checkNotificationStatus();
   }
 
@@ -37,7 +36,6 @@ class _SettingsPageState extends State<SettingsPage> {
               .collection('events')
               .where('userId', isEqualTo: user.uid)
               .get();
-      // Consider notifications enabled if at least one event has a notificationId
       bool hasNotifications = querySnapshot.docs.any(
         (doc) => doc['notificationId'] != null,
       );
@@ -206,8 +204,6 @@ class _SettingsPageState extends State<SettingsPage> {
 
       int hour = int.parse(timeComponents[0]);
       final minute = int.parse(timeComponents[1]);
-
-      // Convert to 24-hour format
       if (period == 'PM' && hour != 12) {
         hour += 12;
       } else if (period == 'AM' && hour == 12) {
@@ -236,7 +232,6 @@ class _SettingsPageState extends State<SettingsPage> {
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: ListView(
               children: [
-                // Profile Card
                 const SizedBox(height: 16),
                 Card(
                   color: Theme.of(context).cardColor,
@@ -282,8 +277,6 @@ class _SettingsPageState extends State<SettingsPage> {
                     ),
                   ),
                 ),
-
-                // Notification Preferences Section
                 const SizedBox(height: 16),
                 Text(
                   'Notification Preferences',

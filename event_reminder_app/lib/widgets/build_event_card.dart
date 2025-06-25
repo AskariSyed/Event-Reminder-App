@@ -11,16 +11,12 @@ String calculateRemainingTime(
     final timeString = event['time'] ?? '';
 
     final parsedDate = DateFormat('EEEE, MMMM d, yyyy').parse(dateString);
-
-    // Clean the time string
     final cleanedTimeString =
         timeString
             .replaceAll(RegExp(r'[\u202F\u00A0\u2007\u2060\uFEFF\u200B]'), ' ')
             .replaceAll(RegExp(r'[^\x00-\x7F]'), '')
             .replaceAll(RegExp(r'\s+'), ' ')
             .trim();
-
-    // Parse time
     final timeParts = cleanedTimeString.split(' ');
     if (timeParts.length != 2) throw FormatException('Invalid time format');
 
@@ -34,8 +30,6 @@ String calculateRemainingTime(
 
     int hour = int.parse(timeComponents[0]);
     final minute = int.parse(timeComponents[1]);
-
-    // Convert to 24-hour format
     if (period == 'PM' && hour != 12) {
       hour += 12;
     } else if (period == 'AM' && hour == 12) {
@@ -55,8 +49,8 @@ String calculateRemainingTime(
 
     if (returnStatus) {
       if (diff.isNegative) return 'passed';
-      if (diff.inMinutes < 60) return 'near'; // Less than 1 hour
-      if (diff.inHours < 24) return 'soon'; // Less than 1 day
+      if (diff.inMinutes < 60) return 'near';
+      if (diff.inHours < 24) return 'soon';
       return 'future';
     }
 
@@ -70,7 +64,7 @@ String calculateRemainingTime(
     if (diff.inMinutes > 0) {
       return '${diff.inMinutes} min${diff.inMinutes > 1 ? 's' : ''} left';
     }
-    return '< 1 min left'; // Shortened for consistency
+    return '< 1 min left';
   } catch (e) {
     return 'TBC';
   }
@@ -83,17 +77,17 @@ Widget buildEventCard(
 ) {
   final remainingTime = calculateRemainingTime(event);
   final eventStatus = calculateRemainingTime(event, returnStatus: true);
-
-  // Determine color based on event status, using theme colors where possible
   final Color timeColor;
   switch (eventStatus) {
     case 'passed':
+      // ignore: deprecated_member_use
       timeColor = Theme.of(context).colorScheme.secondary.withOpacity(0.6);
       break;
     case 'near':
       timeColor = Colors.orange; // Keep orange for urgency
       break;
     case 'soon':
+      // ignore: deprecated_member_use
       timeColor = Theme.of(context).colorScheme.primary.withOpacity(0.7);
       break;
     case 'future':

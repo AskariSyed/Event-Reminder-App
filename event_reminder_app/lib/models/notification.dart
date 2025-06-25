@@ -23,15 +23,10 @@ class Notification {
     if (!isEnabled) return;
 
     try {
-      // Parse date (e.g., "Monday, June 10, 2024" or "Today, June 8, 2024")
       String cleanedDate = date.replaceFirst('Today, ', '');
       DateTime eventDate = DateFormat('EEEE, MMMM d, yyyy').parse(cleanedDate);
-
-      // Parse start time (e.g., "10:00 AM" from "10:00 AM - 11:30 AM")
       String startTime = time.split(' - ')[0];
       DateTime eventTime = DateFormat('h:mm a').parse(startTime);
-
-      // Combine date and time
       DateTime scheduledDateTime = DateTime(
         eventDate.year,
         eventDate.month,
@@ -44,8 +39,6 @@ class Notification {
         scheduledDateTime,
         tz.local,
       );
-
-      // Ensure the scheduled time is in the future
       if (tzScheduledDate.isBefore(tz.TZDateTime.now(tz.local))) {
         print('Cannot schedule notification for past time: $tzScheduledDate');
         return;

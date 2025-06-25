@@ -151,7 +151,7 @@ class _EditEventScreenState extends State<EditEventScreen> {
         selectedDate != null &&
         selectedTime != null) {
       setState(() {
-        _isLoading = true; // Show loading indicator
+        _isLoading = true;
       });
 
       _formKey.currentState!.save();
@@ -164,7 +164,7 @@ class _EditEventScreenState extends State<EditEventScreen> {
 
       if (user == null) {
         setState(() {
-          _isLoading = false; // Hide loading indicator
+          _isLoading = false;
         });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -216,7 +216,7 @@ class _EditEventScreenState extends State<EditEventScreen> {
           if (widget.event['notificationId'] != null) {
             await cancelNotification(widget.event['notificationId']);
           }
-          // Schedule new notification
+
           await scheduleNotification(
             id: notificationId,
             title: title,
@@ -263,7 +263,7 @@ class _EditEventScreenState extends State<EditEventScreen> {
       } finally {
         if (mounted) {
           setState(() {
-            _isLoading = false; // Hide loading indicator
+            _isLoading = false;
           });
         }
       }

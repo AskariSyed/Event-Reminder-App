@@ -33,7 +33,7 @@ class ThemeProvider with ChangeNotifier {
     primaryColor: const Color(0xFF6F61EF),
     scaffoldBackgroundColor: const Color(0xFFF5F6FA),
     cardColor: Colors.white,
-    shadowColor: Colors.black, // Added for shadows
+    shadowColor: Colors.black,
     appBarTheme: const AppBarTheme(
       backgroundColor: Color(0xFFF1F4F8),
       foregroundColor: Color(0xFF15161E),
@@ -61,7 +61,7 @@ class ThemeProvider with ChangeNotifier {
       primary: Color(0xFF6F61EF),
       secondary: Color(0xFF606A85),
       surface: Colors.white,
-      surfaceContainer: Color(0xFFE0E0E0), // Replaced surfaceVariant
+      surfaceContainer: Color(0xFFE0E0E0),
     ).copyWith(brightness: Brightness.light),
   );
 
@@ -70,7 +70,7 @@ class ThemeProvider with ChangeNotifier {
     primaryColor: const Color(0xFF6F61EF),
     scaffoldBackgroundColor: const Color(0xFF121212),
     cardColor: const Color(0xFF1E1E1E),
-    shadowColor: Colors.grey[900]!, // Added for shadows
+    shadowColor: Colors.grey[900]!,
     appBarTheme: const AppBarTheme(
       backgroundColor: Color(0xFF1E1E1E),
       foregroundColor: Colors.white,
@@ -99,7 +99,7 @@ class ThemeProvider with ChangeNotifier {
       primary: Color(0xFF6F61EF),
       secondary: Color(0xFF606A85),
       surface: Color(0xFF1E1E1E),
-      surfaceContainer: Color(0xFF2C2C2C), // Replaced surfaceVariant
+      surfaceContainer: Color(0xFF2C2C2C),
     ).copyWith(brightness: Brightness.dark),
   );
 }
